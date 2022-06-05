@@ -1,12 +1,23 @@
-#find duplicate file from given directory
+import datetime
 import os
 import hashlib
 import sys
 from colorama import Fore
+import argparse
+
+
+parser = argparse.ArgumentParser(
+    description='Find and delete duplicate files in a directory')
+parser.add_argument('path', metavar="path",
+                    help='Directory to scan for duplicates')
+parser.add_argument(
+    '-d', '--delete', help='Delete duplicate files', action='store_true')
 
 
 def get_files_from_path(path):
-    print(f"{Fore.GREEN}[+]{Fore.RESET} Scanning {path} for files {Fore.RESET}")
+    '''Iterate through all files in a directory and return a list of file paths'''
+    print(
+        f"{Fore.GREEN}[+]{Fore.RESET} Scanning {path} for files {Fore.RESET}")
     files = []
     for dirpath, dirnames, filenames in os.walk(path):
         for filename in filenames:
@@ -15,6 +26,7 @@ def get_files_from_path(path):
 
 
 def get_hash(filename):
+    '''Calculate the hash of a file'''
     hash = hashlib.sha256()
     with open(filename, 'rb') as f:
         for chunk in iter(lambda: f.read(4096), b''):
@@ -23,7 +35,7 @@ def get_hash(filename):
 
 
 def find_duplicate_files_with_hash(path):
-    print(f"{Fore.GREEN}[+]{Fore.RESET} Checking for duplicate files in {path}")
+    '''Find duplicate files in a directory and return a dictionary of hashes and file paths'''
     files = get_files_from_path(path)
     hashes = {}
     dups = 0
@@ -38,35 +50,40 @@ def find_duplicate_files_with_hash(path):
 
 
 def print_duplicate_files(hashes, dupes):
+    '''Print duplicate files in a directory'''
     print(f"{Fore.GREEN}[+]{Fore.RESET} Found {dupes} duplicate files")
     for hash, filenames in hashes.items():
         if len(filenames) > 1:
             print(f"{Fore.RED}{hash}{Fore.RESET}")
             for filename in filenames:
-                print(f"{Fore.YELLOW}"+'\t%s' % filename,f"{Fore.RESET}")
+                print(f"{Fore.YELLOW}"+'\t%s' % filename, f"{Fore.RESET}")
 
 
-#keep only one of copy the duplicate files
 def delete_duplicate_files(hashes, dupes):
+    '''Delete duplicate files keeping one copy'''
     print(f"{Fore.GREEN}[+]{Fore.RESET} Deleting duplicate files")
+    with open('deleted_files.txt', 'a') as f:        
+        f.write(f"-------------------{datetime.datetime.now()}-------------------\n")
+    with open('kept_files.txt', 'a') as f:
+        f.write(f"-------------------{datetime.datetime.now()}-------------------\n")
     for hash, filenames in hashes.items():
         if len(filenames) > 1:
-            for fileNO,filename in enumerate(filenames):
-                if not fileNO == 0:
+            for fileNo, filename in enumerate(filenames):
+                if not fileNo == 0:
                     os.remove(filename)
+                    with open('deleted_files.txt', 'a') as f: #log deleted files
+                        f.write(f"{filename}\n")
                 else:
-                    with open("duplicate_files.txt", "a") as f:
+                    with open("kept_files.txt", "a") as f: #log kept files
                         f.write(filename+"\n")
     print(f"{Fore.GREEN}[+]{Fore.RESET} {dupes} Duplicate files deleted")
-                
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print('Usage: %s <path>' % sys.argv[0])
-        sys.exit(1)
-    hashes, dupes = find_duplicate_files_with_hash(sys.argv[1])    
+    path = parser.parse_args().path
+    delete = parser.parse_args().delete
+    hashes, dupes = find_duplicate_files_with_hash(path)
     print_duplicate_files(hashes, dupes)
-    delete_duplicate_files(hashes, dupes)
+    if delete:
+        delete_duplicate_files(hashes, dupes)
     sys.exit(0)
-
