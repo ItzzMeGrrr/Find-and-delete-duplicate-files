@@ -1,4 +1,4 @@
-## Find and delete all the duplicate files in the current directory recursively keeping the first one
+## Find and delete all the duplicate files in the current directory recursively, keeping the first one
 
 This is a simple script that finds all the duplicate files in the current directory recursively, keeps the first copy, and deletes the rest of them.
 
