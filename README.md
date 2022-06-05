@@ -16,4 +16,8 @@ optional arguments:
   -d, --delete  Delete duplicate files
 ```
 
-By default it will only print the duplicates, but if you add the `--delete` flag it will delete the duplicates.
+By default, it will only print the duplicates, but if you add the `--delete` flag it will delete the duplicates.
+
+If `--delete` if provided two log files will be created: `deleted_files.txt` and `kept_files.txt`.
+
+`deleted_files.txt` contains the files that were deleted, and `kept_files.txt` contains the files that were kept.

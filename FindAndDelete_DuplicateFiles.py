@@ -87,10 +87,12 @@ if __name__ == '__main__':
     try:
         path = parser.parse_args().path
         delete = parser.parse_args().delete
+        if not delete:
+            print(f"{Fore.YELLOW}[*]{Fore.RESET} Delete flag not provided, only listing duplicate files!")
         hashes, dupes = find_duplicate_files_with_hash(path)
         print_duplicate_files(hashes, dupes)
         if delete:
             delete_duplicate_files(hashes, dupes)
-    except Exception as e:
-        print(f"{Fore.RED}[-]{Fore.RESET} {e}")
+    except KeyboardInterrupt as e:
+        print(f"{Fore.RED}[-]{Fore.RESET} User Interupt! \nExitting...")
         sys.exit(1)
